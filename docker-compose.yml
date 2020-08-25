@@ -1,11 +1,13 @@
 web:
+    restart: always
     build: .
     command: python3 -u runapp.py
     ports:
-      - "5000:5000"
+      - "8092:5000"
     volumes:
       - ./app:/app
     links:
       - db
 db:
     image: mongo:3.6
+    restart: always
