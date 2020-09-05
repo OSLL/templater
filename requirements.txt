@@ -11,6 +11,7 @@ pyramid==1.10.4
 pyramid-debugtoolbar==4.6.1
 pyramid-jinja2==2.8
 python-docx==0.8.10
+requests==2.24.0
 secretary==0.2.19
 selenium==3.141.0
 waitress==1.4.4
