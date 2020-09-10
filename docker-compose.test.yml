@@ -5,8 +5,6 @@ services:
             context: .
             dockerfile: Dockerfile.test
         command: pytest /app/templater/tests.py -s
-        volumes:
-            - ./app:/app
         healthcheck:
             test: ["CMD", "curl", "-f", "http://web:5000"]
             interval: 30s
@@ -18,16 +16,19 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        command: python3 -u runapp.py
-        logging:
-            driver: "none"
-        # ports:
-        #     - "5000:5000"
-        volumes:
-            - ./app:/app
+        #command: python3 -u runapp.py
+        command: >
+            sh -c "sed -i 's/let recaptcha_site_key = .*/let recaptcha_site_key = \"6LebQMgZAAAAAOqpNojsAdJIanme__SYR-H4Z2V-\"/' /app/templater/static/js/main.js &&
+                sed -i 's/recaptcha_key = .*/recaptcha_key = 6LebQMgZAAAAAOcwhzOtpnxYtfeVP1B11FB30Cc1/' /app/config.ini &&
+                sed -i 's/RECAPTCHA_SITE_KEY/6LebQMgZAAAAAOqpNojsAdJIanme__SYR-H4Z2V-/' /app/templater/templates/layout.jinja2 &&
+                python3 -u runapp.py"
+        #logging:
+        #    driver: "none"
+        #ports:
+        #    - "5000:5000"
         links:
             - db
     db:
         image: mongo:3.6
-        logging:
-            driver: "none"
+        #logging:
+        #    driver: "none"

@@ -4,10 +4,10 @@ RUN apt-get update
 RUN apt-get install -y python3.6 python3-pip
 # RUN apt-get install -y pandoc
 
-ADD requirements.txt /requirements.txt
+COPY requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
 
-ADD app /app
+COPY app /app
 
 ENV PYTHONPATH=/app
 WORKDIR /app

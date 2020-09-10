@@ -65,8 +65,11 @@ class FunctionalTests(unittest.TestCase):
 
 
     def test_files(self):
-        self.driver.get("http://localhost:5000/")  
-
+        try:
+            self.driver.get("http://localhost:5000/")  
+        except:
+            self.driver.get("http://web:5000/")
+            
         if(len(self.driver.find_element(By.TAG_NAME, 'body').get_attribute('innerHTML'))==0):
             self.driver.get("http://web:5000/")
         
