@@ -1,17 +1,18 @@
-web:
-    restart: always
-    build: .
-    command: python3 -u runapp.py
-    ports:
-      - "8092:5000"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-    links:
-      - db
-db:
-    image: mongo:3.6
-    restart: always
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+services:
+    web:
+        restart: always
+        build: .
+        command: python3 -u runapp.py
+        ports:
+          - "8092:5000"
+        volumes:
+          - /etc/localtime:/etc/localtime:ro
+          - /etc/timezone:/etc/timezone:ro
+        links:
+          - db
+    db:
+        image: mongo:3.6
+        restart: always
+        volumes:
+          - /etc/localtime:/etc/localtime:ro
+          - /etc/timezone:/etc/timezone:ro
