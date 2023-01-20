@@ -10,6 +10,8 @@ services:
           - /etc/timezone:/etc/timezone:ro
         links:
           - db
+        env_file:
+          - .env
     db:
         image: mongo:3.6
         restart: always
