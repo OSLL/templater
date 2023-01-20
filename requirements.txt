@@ -14,5 +14,6 @@ python-docx==0.8.10
 requests==2.24.0
 secretary==0.2.19
 selenium==3.141.0
+tzlocal==2.1
 waitress==1.4.4
 xlrd==1.2.0
