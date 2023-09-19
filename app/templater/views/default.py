@@ -64,7 +64,7 @@ def upload_doc(request):
             renderer.load_data(datafile)
             res['data'] = renderer.raw_table
         return res
-    return HTTPBadRequest(body=json.dump({'status': 'err', 'reason':RECAPTCHA_ERROR}))
+    return HTTPBadRequest(body=json.dumps({'status': 'err', 'reason':RECAPTCHA_ERROR}))
 
 @view_config(route_name='files', request_method='GET')
 def get_doc(request):
