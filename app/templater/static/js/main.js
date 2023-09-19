@@ -28,6 +28,7 @@ function upload(file, callback, processBar, tablePreview = false) {
             req.open("POST", "/upload", true);
 
             req.onload = function(event) {
+                console.log(req.response);
                 if (req.status == 200) {
                     console.log(req.response);
                     console.log(JSON.parse(req.response));
@@ -36,7 +37,6 @@ function upload(file, callback, processBar, tablePreview = false) {
                 } else {
                     alert('Error occured when trying to upload your file')
                     console.log("Error " + req.status + " occurred when trying to upload your file.<br \/>");
-                    console.log(req.response);
                 }
             };
             req.send(formData);
@@ -229,6 +229,7 @@ function verifyTemplate() {
             req.open("POST", "/verify?_LOCALE_=" + getLocale(), true);
 
             req.onload = function(event) {
+                console.log(req.response)
                 if (req.status == 200) {
                     var res = JSON.parse(req.response)
 
@@ -287,6 +288,7 @@ function generateResult() {
             req.open("POST", "/render", true);
 
             req.onload = function(event) {
+                console.log(req.response)
                 if (req.status == 200) {
                     var res = JSON.parse(req.response)
 
