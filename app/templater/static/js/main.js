@@ -35,7 +35,7 @@ function upload(file, callback, processBar, tablePreview = false) {
                     callback(JSON.parse(req.response));
                     console.log("Uploaded!");
                 } else {
-                    alert('Error occured when trying to upload your file')
+                    alert('Error occured when trying to upload your file: '+req.response)
                     console.log("Error " + req.status + " occurred when trying to upload your file.<br \/>");
                 }
             };
@@ -234,7 +234,7 @@ function verifyTemplate() {
                     var res = JSON.parse(req.response)
 
                     if (res.status == 'err') {
-                        alert('Something wrong occurred')
+                        alert('Something wrong occurred: '+req.response)
                     } else {
 
                         let div_verification = document.getElementById('verificationResult')
@@ -293,7 +293,7 @@ function generateResult() {
                     var res = JSON.parse(req.response)
 
                     if (res.status == 'err') {
-                        alert('Something wrong occurred')
+                        alert('Something wrong occurred: '+req.response)
                     } else {
 
                         let div_result = document.getElementById('render-result')

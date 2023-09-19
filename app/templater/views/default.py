@@ -114,7 +114,7 @@ def verify_doc(request):
         except:
             return {'status': 'err'}
     else: 
-        return {'status': 'err'}
+        return HTTPBadRequest(body=json.dumps({'status': 'err', 'reason':RECAPTCHA_ERROR}))
 
 @view_config(route_name='render', request_method='POST', renderer='json')
 def render_doc(request):
@@ -156,4 +156,4 @@ def render_doc(request):
             return {'status': 'OK', 'files': files_id, 'archive': str(archive_id) if archive_id is not None else '', 'archive_name': archive_name}
         except:
             return {'status': 'err'}
-    return {'status': 'err'}
+    return HTTPBadRequest(body=json.dumps({'status': 'err', 'reason':RECAPTCHA_ERROR}))
