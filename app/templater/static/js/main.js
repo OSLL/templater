@@ -28,12 +28,14 @@ function upload(file, callback, processBar, tablePreview = false) {
             req.open("POST", "/upload", true);
 
             req.onload = function(event) {
+                console.log(req.response);
                 if (req.status == 200) {
-                    console.log(JSON.parse(req.response))
+                    console.log(req.response);
+                    console.log(JSON.parse(req.response));
                     callback(JSON.parse(req.response));
                     console.log("Uploaded!");
                 } else {
-                    alert('Error occured when trying to upload your file')
+                    alert('Error occured when trying to upload your file: '+req.response)
                     console.log("Error " + req.status + " occurred when trying to upload your file.<br \/>");
                 }
             };
@@ -227,11 +229,12 @@ function verifyTemplate() {
             req.open("POST", "/verify?_LOCALE_=" + getLocale(), true);
 
             req.onload = function(event) {
+                console.log(req.response)
                 if (req.status == 200) {
                     var res = JSON.parse(req.response)
 
                     if (res.status == 'err') {
-                        alert('Something wrong occurred')
+                        alert('Something wrong occurred: '+req.response)
                     } else {
 
                         let div_verification = document.getElementById('verificationResult')
@@ -285,11 +288,12 @@ function generateResult() {
             req.open("POST", "/render", true);
 
             req.onload = function(event) {
+                console.log(req.response)
                 if (req.status == 200) {
                     var res = JSON.parse(req.response)
 
                     if (res.status == 'err') {
-                        alert('Something wrong occurred')
+                        alert('Something wrong occurred: '+req.response)
                     } else {
 
                         let div_result = document.getElementById('render-result')

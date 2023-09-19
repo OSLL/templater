@@ -1,6 +1,6 @@
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPFound,HTTPBadRequest
 from pyramid.i18n import TranslationStringFactory
 from pyramid.response import FileIter
 from bson import ObjectId
@@ -10,9 +10,10 @@ import time
 import urllib
 import datetime
 import requests
+import json
 
 _ = TranslationStringFactory('templater')
-
+RECAPTCHA_ERROR='Recaptcha is not passed. Try to turn off VPN and / or  exit incognito mode.'
 
 def recaptcha(request):
     ip = request.remote_addr
@@ -24,6 +25,8 @@ def recaptcha(request):
         'response': token,
         'remoteip': ip
     })
+    print("result of recaptcha request: {}".format(r.json()))
+
     return r.json()['score'] > 0.3
 
 
@@ -61,7 +64,7 @@ def upload_doc(request):
             renderer.load_data(datafile)
             res['data'] = renderer.raw_table
         return res
-    return {'status': 'err'}
+    return HTTPBadRequest(body=json.dumps({'status': 'err', 'reason':RECAPTCHA_ERROR}))
 
 @view_config(route_name='files', request_method='GET')
 def get_doc(request):
@@ -111,7 +114,7 @@ def verify_doc(request):
         except:
             return {'status': 'err'}
     else: 
-        return {'status': 'err'}
+        return HTTPBadRequest(body=json.dumps({'status': 'err', 'reason':RECAPTCHA_ERROR}))
 
 @view_config(route_name='render', request_method='POST', renderer='json')
 def render_doc(request):
@@ -153,4 +156,4 @@ def render_doc(request):
             return {'status': 'OK', 'files': files_id, 'archive': str(archive_id) if archive_id is not None else '', 'archive_name': archive_name}
         except:
             return {'status': 'err'}
-    return {'status': 'err'}
+    return HTTPBadRequest(body=json.dumps({'status': 'err', 'reason':RECAPTCHA_ERROR}))
