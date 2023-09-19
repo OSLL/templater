@@ -29,12 +29,14 @@ function upload(file, callback, processBar, tablePreview = false) {
 
             req.onload = function(event) {
                 if (req.status == 200) {
-                    console.log(JSON.parse(req.response))
+                    console.log(req.response);
+                    console.log(JSON.parse(req.response));
                     callback(JSON.parse(req.response));
                     console.log("Uploaded!");
                 } else {
                     alert('Error occured when trying to upload your file')
                     console.log("Error " + req.status + " occurred when trying to upload your file.<br \/>");
+                    console.log(req.response);
                 }
             };
             req.send(formData);

@@ -24,6 +24,8 @@ def recaptcha(request):
         'response': token,
         'remoteip': ip
     })
+    print("result of recaptcha request: {}".format(r.json()))
+
     return r.json()['score'] > 0.3
 
 
@@ -61,7 +63,7 @@ def upload_doc(request):
             renderer.load_data(datafile)
             res['data'] = renderer.raw_table
         return res
-    return {'status': 'err'}
+    return Reponse(body={'status': 'err'}, status_int=500)
 
 @view_config(route_name='files', request_method='GET')
 def get_doc(request):
