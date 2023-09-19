@@ -10,6 +10,7 @@ import time
 import urllib
 import datetime
 import requests
+import json
 
 _ = TranslationStringFactory('templater')
 
@@ -63,7 +64,7 @@ def upload_doc(request):
             renderer.load_data(datafile)
             res['data'] = renderer.raw_table
         return res
-    return Response(body={'status': 'err'}, status_int=500)
+    return Response(body=json.loads({'status': 'err'}), status_int=500)
 
 @view_config(route_name='files', request_method='GET')
 def get_doc(request):
