@@ -63,7 +63,7 @@ def upload_doc(request):
             renderer.load_data(datafile)
             res['data'] = renderer.raw_table
         return res
-    return Reponse(body={'status': 'err'}, status_int=500)
+    return Response(body={'status': 'err'}, status_int=500)
 
 @view_config(route_name='files', request_method='GET')
 def get_doc(request):
