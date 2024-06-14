@@ -1,6 +1,6 @@
 import csv
 import xlrd
-from docxtpl import DocxTemplate
+from docxtpl import DocxTemplate, RichText
 from jinja2 import Environment, Template, meta
 from .custom_exceptions import TemplateTypeNotSupported, OutputNameTemplateSyntax
 from .custom_odt_renderer import CustomOdtRenderer
@@ -20,23 +20,30 @@ class RenderResult(object):
 
 class TemplateRenderer(object):
 
+    MULTILINE_PREFIX = "&^<\\multiline>"
+
     def __init__(self):
         self.contexts = []
         self.fieldnames = []
         self.raw_table = []
 
+    def _preprocess_value(self, value):
+        if value.startswith(self.MULTILINE_PREFIX):
+            value = RichText(value[len(self.MULTILINE_PREFIX):])
+        return value
+
     # Load data from csv file
     def load_csv(self, csvfile, delimiter):
         # open csv file and prepare context array
-        lines = csvfile.read().decode("utf-8-sig").splitlines()
-        reader = csv.DictReader(lines, delimiter=delimiter)
+        lines = csvfile.read().decode("utf-8-sig")
+        reader = csv.DictReader(io.StringIO(lines), delimiter=delimiter)
         self.fieldnames = reader.fieldnames
         self.raw_table.append(self.fieldnames)
         for row in reader:
             context = {}
             r = []
             for key, value in row.items():
-                context[key] = value
+                context[key] = self._preprocess_value(value)
                 r.append(value)
             self.contexts.append(context)
             self.raw_table.append(r)
@@ -52,7 +59,7 @@ class TemplateRenderer(object):
             r = []
             for col in range(sh.ncols):
                 value = str(sh.cell_value(rowx=row, colx=col))
-                context[self.fieldnames[col]] = value
+                context[self.fieldnames[col]] = self._preprocess_value(value)
                 r.append(value)
             self.contexts.append(context)
             self.raw_table.append(r)
