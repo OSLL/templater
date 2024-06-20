@@ -29,7 +29,7 @@ class TemplateRenderer(object):
 
     def _preprocess_value(self, value):
         if value.startswith(self.MULTILINE_PREFIX):
-            value = RichText(value[len(self.MULTILINE_PREFIX):])
+            value = RichText(value[len(self.MULTILINE_PREFIX):].replace("\\\\n","\n"))
         return value
 
     # Load data from csv file
@@ -43,6 +43,7 @@ class TemplateRenderer(object):
             context = {}
             r = []
             for key, value in row.items():
+                value = value.lstrip('\"').rstrip('\"')
                 context[key] = self._preprocess_value(value)
                 r.append(value)
             self.contexts.append(context)

@@ -3,9 +3,14 @@
 Из папки репозитория:
 
 Запуск:
-
+    
+    cp .env_template .env
     docker-compose build
     docker-compose up
+
+Деплой на production:
+
+    ./build_and_run.sh <RECAPTCHA_SITE_KEY> <RECAPTCHA_SECRET_KEY>
 
 Запуск тестов (когда докер работает и прослушивает адрес localhost:5000):
 
