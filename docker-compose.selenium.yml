@@ -1,0 +1,36 @@
+services:
+    web:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: >
+            sh -c "sed -i 's|let recaptcha_site_key = .*|let recaptcha_site_key = \"${RECAPTCHA_SITE_KEY}\"|' /app/templater/static/js/main.js &&
+            sed -i 's|recaptcha_key = .*|recaptcha_key = \"${RECAPTCHA_SECRET_KEY}\"|' /app/config.ini &&
+            sed -i 's|RECAPTCHA_SITE_KEY|${RECAPTCHA_SITE_KEY}|' /app/templater/templates/layout.jinja2 &&
+            sed -i 's|mongo_uri = .*|mongo_uri = mongodb://db:27017/templater|' /app/config.ini &&
+            sed -i '/def recaptcha/,/return/c\def recaptcha(request):\\n    return True' /app/templater/views/default.py &&
+            python3 -u runapp.py"
+        ports:
+          - "127.0.0.1:8080:5000"
+        depends_on:
+            - db
+    
+    db:
+        image: mongo:8-noble
+
+    tests:
+      build:
+        context: .
+        dockerfile: Dockerfile.selenium
+      depends_on:
+          - web
+
+    selenium-hub:
+      image: selenium/hub:4.41.0-20260222
+      ports:
+        - "127.0.0.1:4445:4444"
+
+    chrome-node:
+      image: selenium/node-chrome:145.0-20260222
+      environment:
+        - SE_EVENT_BUS_HOST=selenium-hub
