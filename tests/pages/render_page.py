@@ -1,5 +1,3 @@
-import array
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -26,6 +24,9 @@ class RenderPage(BasePage):
             values.append(elem.get_attribute("value"))
         return values
     
+    def click_generate(self):
+        self.click(self.generate_btn_by)
+
     def wait_until_result_tab_active(self):
         self.wait.until(
             lambda x: "active" in x.find_element(*self.result_tab_by).get_attribute("class")
