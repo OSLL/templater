@@ -1,0 +1,41 @@
+services:
+  sut:
+    build:
+      context: .
+      dockerfile: Dockerfile.selenium
+    command: pytest tests/ -v
+    network_mode: "service:web"
+    environment:
+      BASE_URL: "http://localhost:5000"
+      HEADLESS: "1"
+      CHROME_BIN: /usr/bin/chromium
+    depends_on:
+      web:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_PORT_27017_TCP_ADDR: db
+      TZ: UTC
+      RECAPTCHA_SITE_KEY: ${RECAPTCHA_SITE_KEY:?set RECAPTCHA_SITE_KEY in .env}
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:?set RECAPTCHA_SECRET_KEY in .env}
+    command: ["/recaptcha-entrypoint.sh"]
+    volumes:
+      - ./docker/recaptcha-entrypoint.sh:/recaptcha-entrypoint.sh:ro
+    ports:
+      - "8092:5000"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      - db
+
+  db:
+    image: mongo:8-noble
+    restart: always

@@ -1,0 +1,39 @@
+services:
+  sut:
+    build:
+      context: .
+      dockerfile: Dockerfile.selenium
+    command: pytest tests/ -v
+    environment:
+      BASE_URL: "http://web:5000"
+      HEADLESS: "1"
+      CHROME_BIN: /usr/bin/chromium
+    depends_on:
+      web:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_PORT_27017_TCP_ADDR: db
+      TZ: UTC
+      RECAPTCHA_DISABLED: "1"
+    command: >
+      sh -c "sed -i 's/let recaptcha_site_key = .*/let recaptcha_site_key = \"6LebQMgZAAAAAOqpNojsAdJIanme__SYR-H4Z2V-\"/' /app/templater/static/js/main.js &&
+             sed -i 's/recaptcha_key = .*/recaptcha_key = 6LebQMgZAAAAAOcwhzOtpnxYtfeVP1B11FB30Cc1/' /app/config.ini &&
+             sed -i 's/RECAPTCHA_SITE_KEY/6LebQMgZAAAAAOqpNojsAdJIanme__SYR-H4Z2V-/' /app/templater/templates/layout.jinja2 &&
+             python3 -u runapp.py"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      - db
+
+  db:
+    image: mongo:8-noble
+    restart: always
