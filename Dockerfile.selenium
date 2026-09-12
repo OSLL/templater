@@ -1,0 +1,16 @@
+FROM python:3.9-slim-bookworm
+
+# chromium-driver is always version-matched with chromium in Debian repos
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
+    chromium-driver \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt pytest openpyxl
+
+COPY app /app
+COPY tests /tests
+
+ENV PYTHONPATH=/
+WORKDIR /
