@@ -25,8 +25,6 @@ def page(driver, base_url):
     return HomePage(driver, base_url).open()
 
 
-# ── valid formats ──────────────────────────────────────────────────────────────
-
 @pytest.mark.parametrize("ext", ["docx", "xlsx", "pptx", "odt", "ods", "odp"])
 def test_valid_template_format_accepted(page, valid_templates, ext):
     """Uploading a template in each supported format must succeed."""
@@ -36,8 +34,6 @@ def test_valid_template_format_accepted(page, valid_templates, ext):
         f".{ext} template should be accepted and the 'Use this template' button should appear"
     )
 
-
-# ── invalid / unsupported extensions ──────────────────────────────────────────
 
 @pytest.mark.parametrize("ext", ["txt", "pdf", "jpg"])
 def test_invalid_template_format_rejected(page, generated_fixtures, ext):
@@ -52,8 +48,6 @@ def test_invalid_template_format_rejected(page, generated_fixtures, ext):
     )
 
 
-# ── missing file ───────────────────────────────────────────────────────────────
-
 def test_no_template_file_shows_error(page):
     """Clicking upload without selecting a file must show 'No file chosen'."""
     page.click_upload_template()
@@ -62,8 +56,6 @@ def test_no_template_file_shows_error(page):
         f"Expected 'no file' alert, got: {alert_text!r}"
     )
 
-
-# ── empty file ─────────────────────────────────────────────────────────────────
 
 def test_empty_template_rejected(page, generated_fixtures):
     """
@@ -78,13 +70,10 @@ def test_empty_template_rejected(page, generated_fixtures):
         alert_text = page.get_alert_text_and_dismiss(timeout=5)
         assert alert_text, "Expected a non-empty error message for an empty template"
     except TimeoutException:
-        # No alert fired – fall back to checking that the button did not appear
         assert not page.is_template_accepted(), (
             "Empty template must not be accepted (no 'Use this template' button)"
         )
 
-
-# ── corrupted / malformed file ─────────────────────────────────────────────────
 
 def test_corrupted_template_handled_gracefully(page, generated_fixtures):
     """
@@ -102,8 +91,6 @@ def test_corrupted_template_handled_gracefully(page, generated_fixtures):
         "(content errors surface later at verify/render)"
     )
 
-
-# ── file-size limit ────────────────────────────────────────────────────────────
 
 def test_large_template_rejected(page, generated_fixtures):
     """A file larger than 15 MB must trigger the client-side 'File too large' alert."""

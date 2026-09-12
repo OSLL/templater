@@ -24,8 +24,6 @@ _APP_TEMPLATES = os.path.abspath(os.path.join(_HERE, "..", "app", "tests", "temp
 _APP_DATA = os.path.abspath(os.path.join(_HERE, "..", "app", "tests", "data"))
 
 
-# ── driver / URL ───────────────────────────────────────────────────────────────
-
 @pytest.fixture(scope="session")
 def base_url():
     return os.environ.get("BASE_URL", "http://localhost:5000")
@@ -47,8 +45,6 @@ def driver():
     yield drv
     drv.quit()
 
-
-# ── valid fixture files ────────────────────────────────────────────────────────
 
 @pytest.fixture(scope="session")
 def valid_templates():
@@ -84,11 +80,9 @@ def valid_data_tables(tmp_path_factory):
         shutil.copy(str(xlsx), str(xls))
         files["xls"] = str(xls)
     except ImportError:
-        pass  # openpyxl unavailable; xlsx/xls tests will be skipped
+        pass
     return files
 
-
-# ── generated negative-test fixture files ─────────────────────────────────────
 
 @pytest.fixture(scope="session")
 def generated_fixtures(tmp_path_factory):
@@ -109,31 +103,26 @@ def generated_fixtures(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("fixtures")
     f = {}
 
-    # unsupported extensions
     for ext in ("txt", "pdf", "jpg"):
         p = tmp / f"unsupported.{ext}"
         p.write_bytes(b"not a real document")
         f[f"unsupported_{ext}"] = str(p)
 
-    # empty files with valid extensions
     for ext in ("docx", "csv"):
         p = tmp / f"empty.{ext}"
         p.write_bytes(b"")
         f[f"empty_{ext}"] = str(p)
 
-    # corrupted files: random bytes that cannot be parsed as the indicated format
     garbage = b"\x00\x01\x02\x03\xff\xfe\xfd" * 200
     for ext in ("docx", "xls"):
         p = tmp / f"corrupted.{ext}"
         p.write_bytes(garbage)
         f[f"corrupted_{ext}"] = str(p)
 
-    # CSV with non-UTF-8 bytes so the server-side decode fails
     p = tmp / "corrupted.csv"
     p.write_bytes(b"\xff\xfe" + garbage)
     f["corrupted_csv"] = str(p)
 
-    # files exceeding the 15 MB client-side limit (one per relevant extension)
     over_limit = b"A" * (15 * 1024 * 1024 + 1)
     for ext in ("docx", "csv"):
         p = tmp / f"large.{ext}"

@@ -1,20 +1,9 @@
-# End-to-end run against the real reCAPTCHA keys, for local verification.
-#
-# The site key is registered for the domain "localhost" only, so the page has
-# to be served from localhost for Google to accept the token. The test runner
-# therefore shares the app's network namespace: from inside it the app really
-# is http://localhost:5000, which is also the origin the browser reports.
-#
-# Keys are read from .env (gitignored). Run with:
-#   docker compose -f docker-compose.localhost.yml up --abort-on-container-exit
-# and open http://localhost:8092 to click through it by hand.
 services:
   sut:
     build:
       context: .
       dockerfile: Dockerfile.selenium
     command: pytest tests/ -v
-    # share the app's network namespace so the page origin is localhost:5000
     network_mode: "service:web"
     environment:
       BASE_URL: "http://localhost:5000"
@@ -36,8 +25,6 @@ services:
     command: ["/recaptcha-entrypoint.sh"]
     volumes:
       - ./docker/recaptcha-entrypoint.sh:/recaptcha-entrypoint.sh:ro
-    # 5000 is taken by AirPlay Receiver on macOS, so publish on 8092;
-    # the container port stays 5000, which is what the browser sees
     ports:
       - "8092:5000"
     healthcheck:

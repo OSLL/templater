@@ -32,8 +32,6 @@ def page(driver, base_url):
     return HomePage(driver, base_url).open().goto_data_tab()
 
 
-# ── valid formats ──────────────────────────────────────────────────────────────
-
 @pytest.mark.parametrize("ext", ["csv", "xlsx", "xls"])
 def test_valid_data_format_accepted(page, valid_data_tables, ext):
     """Uploading a data table in each supported format must succeed."""
@@ -45,8 +43,6 @@ def test_valid_data_format_accepted(page, valid_data_tables, ext):
         f".{ext} data table should be accepted and the 'Use this data table' button should appear"
     )
 
-
-# ── invalid / unsupported extensions ──────────────────────────────────────────
 
 @pytest.mark.parametrize("ext", ["txt", "pdf", "jpg"])
 def test_invalid_data_format_rejected(page, generated_fixtures, ext):
@@ -61,8 +57,6 @@ def test_invalid_data_format_rejected(page, generated_fixtures, ext):
     )
 
 
-# ── missing file ───────────────────────────────────────────────────────────────
-
 def test_no_data_file_shows_error(page):
     """Clicking upload without selecting a file must show 'No file chosen'."""
     page.click_upload_data()
@@ -71,8 +65,6 @@ def test_no_data_file_shows_error(page):
         f"Expected 'no file' alert, got: {alert_text!r}"
     )
 
-
-# ── empty file ─────────────────────────────────────────────────────────────────
 
 def test_empty_data_file_rejected(page, generated_fixtures):
     """
@@ -91,8 +83,6 @@ def test_empty_data_file_rejected(page, generated_fixtures):
             "Empty data file must not result in the 'Use this data table' button appearing"
         )
 
-
-# ── corrupted / malformed files ────────────────────────────────────────────────
 
 def test_corrupted_xls_data_file_rejected(page, generated_fixtures):
     """
@@ -119,8 +109,6 @@ def test_corrupted_csv_data_file_rejected(page, generated_fixtures):
         "Data acceptance button must not appear after a corrupted CSV upload"
     )
 
-
-# ── file-size limit ────────────────────────────────────────────────────────────
 
 def test_large_data_file_rejected(page, generated_fixtures):
     """A .csv file larger than 15 MB must trigger the client-side 'File too large' alert."""

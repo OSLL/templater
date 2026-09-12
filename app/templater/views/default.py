@@ -18,8 +18,6 @@ RECAPTCHA_ERROR='Recaptcha is not passed. Try to turn off VPN and / or  exit inc
 EMPTY_FILE_ERROR='The uploaded file is empty.'
 
 def recaptcha(request):
-    # Automated test runs have no valid reCAPTCHA keys, so the check is
-    # skipped explicitly instead of always failing.
     if os.environ.get('RECAPTCHA_DISABLED') == '1':
         return True
 
@@ -35,7 +33,6 @@ def recaptcha(request):
     result = r.json()
     print("result of recaptcha request: {}".format(result))
 
-    # a rejected verification carries 'error-codes' and no 'score' at all
     if not result.get('success'):
         return False
 
@@ -65,8 +62,6 @@ def upload_doc(request):
     if recaptcha(request):
         upload = request.POST['file']
 
-        # an empty upload is stored fine but blows up later at verify/render,
-        # so reject it here where the user still gets a readable message
         upload.file.seek(0, os.SEEK_END)
         if upload.file.tell() == 0:
             return HTTPBadRequest(body=json.dumps({'status': 'err', 'reason': EMPTY_FILE_ERROR}))
