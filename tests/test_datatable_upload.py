@@ -14,9 +14,7 @@ Server-round-trip checks (require running app + test reCAPTCHA keys):
   - Corrupted XLS               → server raises xlrd error → non-200 response
                                    → alert "Error occured when trying to upload..."
   - Corrupted CSV               → server fails on UTF-8 decode → same alert
-  - Empty CSV                   → server returns 200 with null fieldnames; the JS
-                                   callback throws when rendering the preview table,
-                                   so the acceptance button never appears
+  - Empty CSV                   → rejected server-side (HTTP 400) → error alert
 
 Note on XLS/XLSX fixtures: generated with openpyxl (a transitive dep of docxtpl).
 If openpyxl is not installed those parametrize branches are skipped automatically.
@@ -78,13 +76,11 @@ def test_no_data_file_shows_error(page):
 
 def test_empty_data_file_rejected(page, generated_fixtures):
     """
-    Uploading a 0-byte .csv file should be rejected.
+    Uploading a 0-byte .csv file must be rejected.
 
-    Current behaviour: the server stores the file and returns HTTP 200 with
-    null fieldnames.  The JS callback then crashes silently when it tries to
-    iterate over the null fieldnames row, so the acceptance button never
-    appears.  We accept either an error alert OR an absent acceptance button
-    as evidence of proper rejection.
+    The server rejects empty uploads with HTTP 400 before storing them, so the
+    JS shows an error alert and the acceptance button never appears.  We accept
+    either outcome as evidence of proper rejection.
     """
     page.upload_data_table(generated_fixtures["empty_csv"])
     try:

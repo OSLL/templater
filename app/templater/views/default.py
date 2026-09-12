@@ -6,6 +6,7 @@ from pyramid.response import FileIter
 from bson import ObjectId
 from templater.lib.templater import RenderResult, TemplateRenderer
 from tempfile import NamedTemporaryFile
+import os
 import time
 import urllib
 import datetime
@@ -14,20 +15,31 @@ import json
 
 _ = TranslationStringFactory('templater')
 RECAPTCHA_ERROR='Recaptcha is not passed. Try to turn off VPN and / or  exit incognito mode.'
+EMPTY_FILE_ERROR='The uploaded file is empty.'
 
 def recaptcha(request):
+    # Automated test runs have no valid reCAPTCHA keys, so the check is
+    # skipped explicitly instead of always failing.
+    if os.environ.get('RECAPTCHA_DISABLED') == '1':
+        return True
+
     ip = request.remote_addr
     token = request.POST['recaptcha-token']
     key = request.registry.settings['templater']['recaptcha_key']
-    
+
     r = requests.post('https://www.google.com/recaptcha/api/siteverify', data={
         'secret': key,
         'response': token,
         'remoteip': ip
     })
-    print("result of recaptcha request: {}".format(r.json()))
+    result = r.json()
+    print("result of recaptcha request: {}".format(result))
 
-    return r.json()['score'] > 0.3
+    # a rejected verification carries 'error-codes' and no 'score' at all
+    if not result.get('success'):
+        return False
+
+    return result.get('score', 0) > 0.3
 
 
 @view_config(route_name='home', renderer='../templates/homepage.jinja2')
@@ -51,12 +63,20 @@ def set_locale_cookie(request):
 @view_config(route_name='upload', request_method='POST', renderer='json')
 def upload_doc(request):
     if recaptcha(request):
-        file_id = request.fs.put(
-            request.POST['file'].file, filename=request.POST['file'].filename)
+        upload = request.POST['file']
+
+        # an empty upload is stored fine but blows up later at verify/render,
+        # so reject it here where the user still gets a readable message
+        upload.file.seek(0, os.SEEK_END)
+        if upload.file.tell() == 0:
+            return HTTPBadRequest(body=json.dumps({'status': 'err', 'reason': EMPTY_FILE_ERROR}))
+        upload.file.seek(0)
+
+        file_id = request.fs.put(upload.file, filename=upload.filename)
         max_age = request.registry.settings['templater'][
             'file_max_age'] if request.registry.settings['templater']['file_max_age'] else 60
         delta = datetime.timedelta(minutes=int(max_age))
-        res = {'status': 'OK', 'file_name': request.POST['file'].filename, 'file_id': str(
+        res = {'status': 'OK', 'file_name': upload.filename, 'file_id': str(
             file_id), 'expire_at': (datetime.datetime.utcnow() + delta).isoformat()}
         if 'table-preview' in request.POST:
             datafile = request.fs.get(ObjectId(file_id))

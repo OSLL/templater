@@ -8,8 +8,7 @@ Client-side checks (pure JS, no server needed):
 
 Server-round-trip checks (require running app + test reCAPTCHA keys):
   - Valid format                → 'Use this template' button appears
-  - Empty file                  → should be rejected (currently accepted by server –
-                                   this test documents a missing validation gap)
+  - Empty file                  → rejected server-side (HTTP 400) → error alert
   - Corrupted file (garbage)    → upload is accepted by the server (no content
                                    inspection at upload time); error surfaces only
                                    at verify/render time
@@ -68,12 +67,11 @@ def test_no_template_file_shows_error(page):
 
 def test_empty_template_rejected(page, generated_fixtures):
     """
-    Uploading a 0-byte file with a .docx extension should be rejected.
+    Uploading a 0-byte file with a .docx extension must be rejected.
 
-    NOTE: The current server implementation does not inspect template content
-    at upload time (files are stored verbatim in GridFS).  This test will
-    therefore FAIL against the current implementation, documenting a missing
-    validation that should be added.
+    The server rejects empty uploads with HTTP 400 before storing them in
+    GridFS, so the JS shows an error alert and the acceptance button stays
+    hidden.  Either outcome is accepted as evidence of rejection.
     """
     page.upload_template(generated_fixtures["empty_docx"])
     try:
